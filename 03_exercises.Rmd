@@ -120,22 +120,35 @@ garden_harvest %>%
 
   3. I would like to understand how much money I "saved" by gardening, for each vegetable type. Describe how I could use the `garden_harvest` and `garden_spending` datasets, along with data from somewhere like [this](https://products.wholefoodsmarket.com/search?sort=relevance&store=10542) to answer this question. You can answer this in words, referencing various join functions. You don't need R code but could provide some if it's helpful.
 
+You can find total weight of harvest for each vegetable and variety combination and find out how much money they would have costed if you would have bought them, then you compare this results with the price(after tax, i guess) from the garden spending table after joining them by vegetable and variety, and perhaps mutate to find the price saved for each plant.
+
+---------------
   4. Subset the data to tomatoes. Reorder the tomato varieties from smallest to largest first harvest date. Create a barplot of total harvest in pounds for each variety, in the new order.
 
 ```{r}
-
+garden_harvest %>% 
+  filter(vegetable == "tomatoes") %>% 
+  select(variety, date, weight) %>% 
+  group_by(variety) %>% 
+  summarise(first_harvest = min(date)) %>% 
+  
+  
 ```
 
   5. In the `garden_harvest` data, create two new variables: one that makes the varieties lowercase and another that finds the length of the variety name. Arrange the data by vegetable and length of variety name (smallest to largest), with one row for each vegetable variety. HINT: use `str_to_lower()`, `str_length()`, and `distinct()`.
   
 ```{r}
-
+garden_harvest %>% 
+  mutate(lower_case_variety = (variety),
+         variety_name_length = str_length(variety)) %>% 
+  arrange(vegetable,variety_name_length)
 ```
 
   6. In the `garden_harvest` data, find all distinct vegetable varieties that have "er" or "ar" in their name. HINT: `str_detect()` with an "or" statement (use the | for "or") and `distinct()`.
 
 ```{r}
-
+garden_harvest %>% 
+  mutate(er_ar_detector = str_detect(variety, "er|ar"))
 ```
 
 
