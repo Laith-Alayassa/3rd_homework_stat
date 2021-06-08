@@ -213,42 +213,112 @@ Trips %>%
   9. A bar graph of the events versus day of the week. Put day on the y-axis.
   
 ```{r}
-
+Trips %>% 
+  mutate(day = wday(sdate),
+         weekday = weekdays(sdate)) %>% 
+  ggplot(aes(x = weekday)) +
+  geom_bar() +
+  labs(title = "Number of rides per day of week",
+       x = "",
+       y = "Number")
 
 ```
   
   10. Facet your graph from exercise 8. by day of the week. Is there a pattern?
   
 ```{r}
-
+Trips %>% 
+  mutate(weekday = weekdays(sdate),
+         hours = hour(sdate),
+         minute = minute(sdate),
+         time = hours + (minute/60)) %>% 
+  ggplot(aes(x = time)) +
+  geom_density() +
+  labs(title = "Ride time probability distribution during the day",
+       x = "Hour",
+       y = "Probability") +
+  facet_wrap(vars(weekday))
 ```
-  
+We see that on working days there is a spike in the morning and a spike in the afternoon (probably transit to and back from work/school), however on weekends there is low traffic in the morning with a constant high during noon till afternoon hours
+
 The variable `client` describes whether the renter is a regular user (level `Registered`) or has not joined the bike-rental organization (`Causal`). The next set of exercises investigate whether these two different categories of users show different rental behavior and how `client` interacts with the patterns you found in the previous exercises. 
 
   11. Change the graph from exercise 10 to set the `fill` aesthetic for `geom_density()` to the `client` variable. You should also set `alpha = .5` for transparency and `color=NA` to suppress the outline of the density function.
   
 ```{r}
-
+Trips %>% 
+  mutate(weekday = weekdays(sdate),
+         hours = hour(sdate),
+         minute = minute(sdate),
+         time = hours + (minute/60)) %>% 
+  ggplot(aes(x = time,
+             fill = client,
+             alpha = 0.1)) +
+  geom_density(color = "NA") +
+  labs(title = "Ride time probability distribution during the day",
+       x = "Hour",
+       y = "Probability") +
+  facet_wrap(vars(weekday))
 ```
 
   12. Change the previous graph by adding the argument `position = position_stack()` to `geom_density()`. In your opinion, is this better or worse in terms of telling a story? What are the advantages/disadvantages of each?
   
 ```{r}
-
+Trips %>% 
+  mutate(weekday = weekdays(sdate),
+         hours = hour(sdate),
+         minute = minute(sdate),
+         time = hours + (minute/60)) %>% 
+  ggplot(aes(x = time,
+             fill = client,
+             alpha = 0.1)) +
+  geom_density(position = position_stack(),
+               color = "NA") +
+  labs(title = "Ride time probability distribution during the day",
+       x = "Hour",
+       y = "Probability") +
+  facet_wrap(vars(weekday))
 ```
-  
+I think that in this situation not using the stacking makes it much clearer when comparing between the two since the data doesn't blend in together and is easier to distinguish between the two.
+
   13. In this graph, go back to using the regular density plot (without `position = position_stack()`). Add a new variable to the dataset called `weekend` which will be "weekend" if the day is Saturday or Sunday and  "weekday" otherwise (HINT: use the `ifelse()` function and the `wday()` function from `lubridate`). Then, update the graph from the previous problem by faceting on the new `weekend` variable. 
   
 ```{r}
-
+Trips %>% 
+  mutate(weekday = weekdays(sdate),
+         hours = hour(sdate),
+         minute = minute(sdate),
+         time = hours + (minute/60),
+         weekend = ifelse(weekday == "Saturday" | weekday == "Sunday", "Weekend","Weekday")) %>% 
+  ggplot(aes(x = time,
+             fill = client,
+             alpha = 0.1)) +
+  geom_density(color = "NA") +
+  labs(title = "Ride time probability distribution during the day",
+       x = "Hour",
+       y = "Probability") +
+  facet_wrap(vars(weekend))
 ```
   
   14. Change the graph from the previous problem to facet on `client` and fill with `weekday`. What information does this graph tell you that the previous didn't? Is one graph better than the other?
   
 ```{r}
-
+Trips %>% 
+  mutate(weekday = weekdays(sdate),
+         hours = hour(sdate),
+         minute = minute(sdate),
+         time = hours + (minute/60),
+         weekend = ifelse(weekday == "Saturday" | weekday == "Sunday", "Weekend","Weekday")) %>% 
+  ggplot(aes(x = time,
+             fill = client,
+             alpha = 0.1)) +
+  geom_density(color = "NA") +
+  labs(title = "Ride time probability distribution during the day",
+       x = "Hour",
+       y = "Probability") +
+  facet_wrap(vars(client, weekend))
 ```
-  
+I think that both graphs convey the same information, however, I also think that the second one is easier to look at and understand (but that is because I understand the data set by now, however if I saw the graphs first time, the first one is probably easier to understand since I have to keep track of less variables.)
 ### Spatial patterns
 
   15. Use the latitude and longitude variables in `Stations` to make a visualization of the total number of departures from each station in the `Trips` data. Use either color or size to show the variation in number of departures. We will improve this plot next week when we learn about maps!
