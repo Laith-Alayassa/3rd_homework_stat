@@ -324,8 +324,6 @@ I think that both graphs convey the same information, however, I also think that
 
   15. Use the latitude and longitude variables in `Stations` to make a visualization of the total number of departures from each station in the `Trips` data. Use either color or size to show the variation in number of departures. We will improve this plot next week when we learn about maps!
 
-I am not quite sure I understand what is needed but I will do what I think you want
-  
 ```{r}
 Trip_station <- Trips %>% 
   left_join(Stations,
@@ -340,14 +338,13 @@ Trip_station %>%
   ggplot(aes(y = long,
              x = lat,
              color = n_dep)) +
-  geom_point()+
-  labs(y = "Longtitude",
-       x = "Latitude") +
+  geom_point(alpha = 0.2)+
+  labs(y = "Long",
+       x = "Lat") +
   theme(legend.title = element_blank())
 
 ```
-I didn't really use the lat and long information because I am unsure what to do, but at least its there in the data frame.
-  
+
   16. Only 14.4% of the trips in our data are carried out by casual users. Create a plot that shows which area(s) have stations with a much higher percentage of departures by casual users. What patterns do you notice? (Again, we'll improve this next week when we learn about maps).
   
 ```{r}
@@ -358,9 +355,13 @@ Trip_station %>%
             n_casual = sum(is_casual),
             percentage_casual = (n_casual/n_trips)* 100) %>% 
   filter(percentage_casual > 14.4) %>% 
-  arrange(desc(percentage_casual))
+  arrange(desc(percentage_casual)) %>% 
+  ggplot(aes(x=lat,
+             y = long,
+             color = percentage_casual)) +
+  geom_point()
 ```
-  
+
 ### Spatiotemporal patterns
 
   17. Make a table with the ten station-date combinations (e.g., 14th & V St., 2014-10-14) with the highest number of departures, sorted from most departures to fewest. Save this to a new data set and print out the data set. Hint: `as_date(sdate)` converts `sdate` from date-time format to date format. 
@@ -384,29 +385,36 @@ top_ten <- Trips%>%
   arrange(desc(n)) %>% 
   head(10)
 ```
+
 ```{r}
-Trips_new <- Trips %>% 
-  mutate(date = as_date(sdate))
+Trips %>% 
+  mutate(date = as_date(sdate)) %>% 
+  inner_join(top_ten,
+             by = c("sstation", "date"))
 ```
-```{r}
-top_ten %>% 
-  left_join(Trips_new)
-```
+
 
   
   19. Build on the code from the previous problem (ie. copy that code below and then %>% into the next step.) and group the trips by client type and day of the week (use the name, not the number). Find the proportion of trips by day within each client type (ie. the proportions for all 7 days within each client type add up to 1). Display your results so day of week is a column and there is a column for each client type. Interpret your results.
 
 ```{r}
-top_ten %>% 
-  left_join(Trips_new) %>% 
-  mutate(day_of_week = weekdays(date)) %>% 
-  group_by(client, day_of_week) %>% 
-  summarise(percent = )
-  
-```
-I am unsure what to do now :) I know what needs to be done but I cannot write the code down for it.
+Trips %>% 
+  mutate(date = as_date(sdate)) %>% 
+  inner_join(top_ten,
+             by = c("sstation", "date")) %>% 
+  mutate(day_of_week = wday(date, label = TRUE)) %>% 
+  group_by(day_of_week, client) %>% 
+  summarise(n_trips = n()) %>% 
+  group_by(client) %>% 
+  mutate(prop = n_trips / sum(n_trips)) %>% 
+  pivot_wider(id_cols = day_of_week,
+              names_from = client,
+              values_from = prop)
 
-**DID YOU REMEMBER TO GO BACK AND CHANGE THIS SET OF EXERCISES TO THE LARGER DATASET? IF NOT, DO THAT NOW.**
+```
+
+
+**DID YOU REMEMBER TO GO BACK AND CHANGE THIS SET OF EXERCISES TO THE LARGER DATASET? IF NOT, DO THAT NOW.** (I'm worried my laptop would crash if I do this)
 
 ## GitHub link
 
